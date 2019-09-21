@@ -7,12 +7,26 @@ public class PlayerController : MonoBehaviour {
 	[SerializeField] private Vector3 playerMoveVector;
 	[SerializeField] private float moveSpeed = 5.0f;
 
+	// オンライン化に必要なコンポーネント
+	public PhotonView myPV;
+	public PhotonTransformView myPTV;
+	private Camera mainCam;
+
 	private Transform player;
 
 	 void Start() {
 		player = transform;
+		// 自分のキャラなら
+		if (myPV.isMine) {
+			mainCam = Camera.main;
+			mainCam.GetComponent<CameraController>().target = this.gameObject.transform;
+		}
 	 }
 	void Update() {
+		if (!myPV.isMine) {
+			return;
+		}
+
 		playerMoving();
 	}
 
@@ -37,5 +51,7 @@ public class PlayerController : MonoBehaviour {
 		if (playerMoveVector.magnitude > 0) {
 			transform.position += playerMoveVector;
 		}
+		Vector3 velocity = playerMoveVector;
+		myPTV.SetSynchronizedValues(velocity, 0);
 	}
 }
